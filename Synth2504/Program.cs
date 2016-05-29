@@ -10,49 +10,58 @@ namespace Synth2504
     {
         static void Main(string[] args)
         {
-            //int sampleRate = 96000;
-            //int duration = 1;
-
-            //DataFileOutput logger1 = new DataFileOutput();
 
             //Wave wave = new Wave(Wave.Sine);
-            //wave.Frequency = 1;
+            //WaveMemoryStream waveStream = new WaveMemoryStream();
 
-            //List<double> waveBuffer = new List<double>();
 
-            //for (int i = 0; i < (wave.Duration / 2) * wave.SampleRate; i++)
+            //wave.Frequency = Note.A7;
+            //wave.Duration = 5;
+
+            //double[] waveData = wave.GenerateSample();
+            //waveStream.SaveIntoStream(waveData, (long)(wave.SampleRate * wave.Duration), wave.SampleRate);
+            //int i = 0;
+            //while(!Console.KeyAvailable)
             //{
-            //   waveBuffer.Add(wave.GetNext(i));
+            //    Console.WriteLine(wave.GetNext(i));
+
+            //    i++;
             //}
-            //wave.SetFunction(Wave.Sawtooth);
-            ////9wave.Phase = 180;
-
-            //for (int i = 0; i < (wave.Duration / 2) * wave.SampleRate; i++)
-            //{
-            //    waveBuffer.Add(wave.GetNext(i));
-            //}
-
-
-            ////double[] wave1Data = wave.GenerateSample();
-            ////wave.SetFunction(Wave.PSquare);
-            ////wave.Phase = 180;
-            ////double[] wave2Data = wave.GenerateSample();
-            ////logger1.OutputCSV(wave1Data, wave2Data, "PhaseData");
-            //double[] WaveformChangeTest = waveBuffer.ToArray();
-            //logger1.OutputCSV(WaveformChangeTest, "WaveformChangeData");
-
-
-            Wave wave = new Wave(Wave.Square);
-            wave.Frequency = 440;
-            int i = 0;
-            while(!Console.KeyAvailable)
-            {
-                Console.WriteLine(wave.GetNext(i));
-                
-                i++;
-            }
-
+            MixerTest();
             Console.ReadLine();
+
+        }
+
+
+        public static void MixerTest()
+        {
+            DataFileOutput mixLogger = new DataFileOutput();
+            Wave waveOne = new Wave(Wave.Square);
+            waveOne.Duration = 5;
+            waveOne.Frequency = Note.D2;
+            Wave waveTwo = new Wave(Wave.Square);
+            //waveTwo.Phase = 17;
+            waveTwo.Duration = 5;
+            waveTwo.Frequency = Note.Fsharp2;
+            Wave waveThree = new Wave(Wave.Square);
+            waveThree.Duration = 5;
+            waveThree.Frequency = Note.A3;
+            //Wave waveFour = new Wave(Wave.Sawtooth);
+            //waveFour.Duration = 5;
+            //waveFour.Frequency = Note.A5;
+            //Wave waveFive = new Wave(Wave.Sawtooth);
+            //waveFive.Duration = 5;
+            //waveFive.Frequency = Note.A6;
+            double[] waveOneData = waveOne.GenerateSample();
+            double[] waveTwoData = waveTwo.GenerateSample();
+            double[] waveThreeData = waveThree.GenerateSample();
+            //double[] waveFourData = waveFour.GenerateSample();
+            //double[] waveFiveData = waveFive.GenerateSample();
+            Mixer mixer = new Mixer();
+            double[] mixData = mixer.Mix(waveOneData, waveTwoData, waveThreeData/*, waveFourData, waveFiveData*/);
+            mixLogger.OutputCSV(mixData, "mixData");
+            WaveMemoryStream mixStream = new WaveMemoryStream();
+            mixStream.SaveIntoStream(mixData, mixData.Length, 96000);
 
         }
     }
