@@ -1,9 +1,6 @@
 ﻿#define DEBUG
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace Synth2504
@@ -72,6 +69,27 @@ namespace Synth2504
             }
         }       //constructor 
 
+        public void OutputCSV(float[] waveOneData, string fileName)
+        {
+            StringBuilder csv = new StringBuilder();
+            _fileName = fileName;
+            foreach (float sample in waveOneData)
+            {
+                string dataPoint = sample.ToString();
+                string newLine = string.Format("{0},", dataPoint);
+                csv.AppendLine(newLine);
+            }
+            try
+            {
+                File.WriteAllText(_filePath + _fileName + ".csv", csv.ToString());
+            }
+            catch (ArgumentNullException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+        }
+
         public void OutputCSV(double[] waveOneData, string fileName)
         {
             StringBuilder csv = new StringBuilder();
@@ -92,6 +110,7 @@ namespace Synth2504
             }
 
         }
+
         public void OutputCSV(double[] waveOneData, string fileName, bool textOutput)
         {
             StringBuilder csv = new StringBuilder();

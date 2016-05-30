@@ -12,29 +12,9 @@ namespace Synth2504
         static void Main(string[] args)
         {
 
-            Wave wave = new Wave(Wave.Sine);
-            //WaveMemoryStream waveStream = new WaveMemoryStream();
-
-
-            wave.Frequency = 1;
-            wave.Duration = 1;
-
-            double[] waveData = wave.GenerateSample();
-            //waveStream.SaveIntoStream(waveData, (long)(wave.SampleRate * wave.Duration), wave.SampleRate);
-            //int i = 0;
-            //while(!Console.KeyAvailable)
-            //{
-            //    Console.WriteLine(wave.GetNext(i));
-
-            //    i++;
-            //}
-            //MixerTest();
-            //foreach (double x in waveData)
-            //{
-            //    DoubleToFloatTest(x);
-            //}
-
+ 
             AlternateWaveGenTest();
+            //FloatDataArray();
             Console.WriteLine("Program complete. Press enter.");
             Console.ReadLine();
 
@@ -84,11 +64,8 @@ namespace Synth2504
 
         public static void AlternateWaveGenTest()
         {
-            SineWaveProvider32 sineWaveProvider = new SineWaveProvider32();
+            Wave sineWaveProvider = new Wave(Wave.Sine);
             WaveOut waveOut;
-            sineWaveProvider.SetWaveFormat(96000, 2);
-            sineWaveProvider.Frequency = 1000f;
-            sineWaveProvider.Amplitude = 1.0f;
             waveOut = new WaveOut();
             waveOut.Init(sineWaveProvider);
             while (!Console.KeyAvailable)
@@ -99,6 +76,20 @@ namespace Synth2504
             waveOut.Dispose();
             waveOut = null;
 
+        }
+
+        public static void FloatDataArray()
+        {
+            Wave wave = new Wave(Wave.Sine);
+            DataFileOutput logger = new DataFileOutput();
+            wave.Frequency = 1;
+            wave.Duration = 1;
+            float[] dataArray = new float[wave.SampleRate];
+            for (int i = 0; i < dataArray.Length; i++)
+            {
+                dataArray[i] = wave.GetNext32(i);
+            }
+            logger.OutputCSV(dataArray, "FloatOutput");
         }
     }
 }

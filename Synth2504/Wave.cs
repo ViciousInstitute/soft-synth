@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using NAudio.Wave;
 
 namespace Synth2504
 {
-    public partial class Wave
+    public class Wave : IWaveProvider
     {
-
 
         private const double _tau = Math.PI * 2;
         private double _phase;
@@ -16,7 +13,14 @@ namespace Synth2504
         private int _sampleRate;
         private double _duration;
         private double _amplitude;
+        private int _channels;
+        private int sample;
         private WaveFunction _waveFunction;
+        private WaveFormat _waveFormat;
+        public WaveFormat WaveFormat
+        {
+            get { return _waveFormat; }
+        }
 
         public delegate double WaveFunction(double x);
 
@@ -26,7 +30,7 @@ namespace Synth2504
         public static WaveFunction Square = new WaveFunction(SquareWave);
         public static WaveFunction PSquare = new WaveFunction(PseudoSquareWave);
 
-        
+
 
 
         /// <summary>
@@ -36,18 +40,24 @@ namespace Synth2504
         /// generate desired waveforms.
         /// </summary>
 
+        public Wave()
+        {
+
+        }
         public Wave(WaveFunction f)
         {
             _waveFunction = f;
             _duration = 1;
             _sampleRate = 96000;
-            _frequency = 1;
+            _frequency = 1000;
             _phase = 0;
             _amplitude = 1;
+            _channels = 2;
+            SetWaveFormat();
         }
 
         //Properties
-       
+
         public double Phase
         {
             get { return _phase; }
@@ -63,23 +73,27 @@ namespace Synth2504
             get { return _duration; }
             set { _duration = value; }
         }
-        public int SampleRate
-        {
-            get { return _sampleRate; }
-            set { _sampleRate = value; }
-        }
-       
-
         public double Amplitude
         {
             get { return _amplitude; }
             set { _amplitude = value; }
         }
+        public int SampleRate
+        {
+            get { return _sampleRate; }
+            set { _sampleRate = value; }
+        }
 
-
-
-
-        public double GetNext(long sampleIndex)
+        public float GetNext32(int sampleIndex)
+        {
+            double samplesPerCycle = (_sampleRate / _frequency);
+            double phase = (_phase / 360) * samplesPerCycle;
+            double cycleIndex = (sampleIndex + phase) % samplesPerCycle;
+            double depthIntoCycle = cycleIndex / samplesPerCycle;
+            double nextSample = _waveFunction(depthIntoCycle);
+            return DoubleToFloat(nextSample);
+        }
+        public double GetNext(int sampleIndex)
         {
             double samplesPerCycle = (_sampleRate / _frequency);
             double phase = (_phase / 360) * samplesPerCycle;
@@ -88,7 +102,19 @@ namespace Synth2504
             double nextSample = _waveFunction(depthIntoCycle);
             return nextSample * _amplitude;
         }
-
+        public static float DoubleToFloat(double d)
+        {
+            double sample = d * 30000.0;
+            if (sample < -32767.0f)
+            {
+                sample = -32767.0f;
+            }
+            if (sample > 32767.0f)
+            {
+                sample = 32767.0f;
+            }
+            return (short)sample;
+        }
         public double[] GenerateSample()
         {
             List<double> data = new List<double>();
@@ -96,16 +122,43 @@ namespace Synth2504
             {
                 data.Add(GetNext(i));
             }
-            double[] waveBuffer = data.ToArray();
-            return waveBuffer;
-        }
 
+            return data.ToArray();
+        }
         public void SetFunction(WaveFunction f)
         {
             _waveFunction = f;
         }
+        public int Read(float[] buffer, int offset, int sampleCount)
+        {
 
 
+            for (int n = 0; n < sampleCount; n++)
+            {
+                buffer[n + offset] = GetNext32(sample) / _sampleRate;
+                sample++;
+                if (sample >= _sampleRate) sample = 0;
+            }
+            return sampleCount;
+        }
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            WaveBuffer waveBuffer = new WaveBuffer(buffer);
+            int samplesRequired = count / 4;
+            int samplesRead = Read(waveBuffer.FloatBuffer, offset / 4, samplesRequired);
+            return samplesRead * 4;
+        }
+        public void SetWaveFormat()
+        {
+            _waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(_sampleRate, _channels);
+        }
+        public void SetWaveFormat(int sampleRate, int channels)
+        {
+            _sampleRate = sampleRate;
+            _channels = channels;
+            _waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(_sampleRate, _channels);
+        }
+        
         #region Wave Functions
         public static double ClockOutput(double x)
         {
@@ -134,7 +187,7 @@ namespace Synth2504
         }
         public static double SawtoothWave(double x)
         {
-            x =  (2 * x) - 1;
+            x = (2 * x) - 1;
             return x;
 
         }
