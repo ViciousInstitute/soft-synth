@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NAudio.Wave;
 
 namespace Synth2504
 {
@@ -11,14 +12,14 @@ namespace Synth2504
         static void Main(string[] args)
         {
 
-            //Wave wave = new Wave(Wave.Sine);
+            Wave wave = new Wave(Wave.Sine);
             //WaveMemoryStream waveStream = new WaveMemoryStream();
 
 
-            //wave.Frequency = Note.A7;
-            //wave.Duration = 5;
+            wave.Frequency = 1;
+            wave.Duration = 1;
 
-            //double[] waveData = wave.GenerateSample();
+            double[] waveData = wave.GenerateSample();
             //waveStream.SaveIntoStream(waveData, (long)(wave.SampleRate * wave.Duration), wave.SampleRate);
             //int i = 0;
             //while(!Console.KeyAvailable)
@@ -27,7 +28,14 @@ namespace Synth2504
 
             //    i++;
             //}
-            MixerTest();
+            //MixerTest();
+            //foreach (double x in waveData)
+            //{
+            //    DoubleToFloatTest(x);
+            //}
+
+            AlternateWaveGenTest();
+            Console.WriteLine("Program complete. Press enter.");
             Console.ReadLine();
 
         }
@@ -62,6 +70,34 @@ namespace Synth2504
             mixLogger.OutputCSV(mixData, "mixData");
             WaveMemoryStream mixStream = new WaveMemoryStream();
             mixStream.SaveIntoStream(mixData, mixData.Length, 96000);
+
+        }
+
+        public static void DoubleToByteTest(double d)
+        {
+           byte[] buffer =  WaveMemoryStream.ByteConverter(d);
+            foreach (byte x in buffer)
+            {
+                Console.WriteLine(x.ToString());
+            }
+        }
+
+        public static void AlternateWaveGenTest()
+        {
+            SineWaveProvider32 sineWaveProvider = new SineWaveProvider32();
+            WaveOut waveOut;
+            sineWaveProvider.SetWaveFormat(96000, 2);
+            sineWaveProvider.Frequency = 1000f;
+            sineWaveProvider.Amplitude = 1.0f;
+            waveOut = new WaveOut();
+            waveOut.Init(sineWaveProvider);
+            while (!Console.KeyAvailable)
+            {
+                waveOut.Play();
+            }
+            waveOut.Stop();
+            waveOut.Dispose();
+            waveOut = null;
 
         }
     }

@@ -13,7 +13,7 @@ namespace Synth2504
 {
     class WaveMemoryStream
     {
-        public void SaveIntoStream(double[] sampleData, long sampleCount, int samplesPerSecond)
+        public void SaveIntoStream(double[] sampleData, int sampleCount, int samplesPerSecond)
         {
             // Export
             MemoryStream stream = new MemoryStream();
@@ -23,8 +23,15 @@ namespace Synth2504
             for (int i = 0; i < sampleCount; i++)
             {
                 sample_l = sampleData[i] * 30000.0;
-                if (sample_l < -32767.0f) { sample_l = -32767.0f; }
-                if (sample_l > 32767.0f) { sample_l = 32767.0f; }
+                if (sample_l < -32767.0f)
+                {
+                    sample_l = -32767.0f;
+                }
+                if (sample_l > 32767.0f)
+                {
+                    sample_l = 32767.0f;
+                }
+
                 sl = (short)sample_l;
                 stream.WriteByte((byte)(sl & 0xff)); //Channel 1, wave audio interleaves channels.
                 stream.WriteByte((byte)(sl >> 8));
@@ -43,17 +50,12 @@ namespace Synth2504
 
             IWavePlayer player = new WaveOut(/*WaveCallbackInfo.FunctionCallback()/**/);
             player.Init(provider);
-
-            
             player.Play();
             
-
-
-
-
-
         }
 
+
+        //currently non-functional
         public void BufferedPlay(double[] sampleData, long sampleCount, int samplesPerSecond)
         {
             MemoryStream stream = new MemoryStream();
@@ -88,9 +90,29 @@ namespace Synth2504
             player.Play();
         }
 
-        public void ProcessingBuffer()
+
+        //this works, splits floats into a byte stream (2 channel wave format)
+        static public byte[] ByteConverter(double sample)
         {
-            
+            double sample_l;
+            short sl;
+            sample_l = sample * 30000.0;
+            if (sample_l < -32767.0f)
+            {
+                sample_l = -32767.0f;
+            }
+            if (sample_l > 32767.0f)
+            {
+                sample_l = 32767.0f;
+            }
+
+            sl = (short)sample_l;
+            byte[] buffer = new byte[4];
+            buffer[0] = (byte)(sl & 0xff);
+            buffer[1] = (byte)(sl >> 8);
+            buffer[2] = (byte)(sl & 0xff);
+            buffer[3] = (byte)(sl >> 8);
+           return buffer;
         }
     }
 }

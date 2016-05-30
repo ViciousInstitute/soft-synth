@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using NAudio.Wave;
 using Synth2504;
@@ -17,7 +10,7 @@ namespace SynthInterface
        static public Wave waveOne;
        static public SineWaveProvider32 sineWaveProvider;
        private WaveOut waveOut;
-
+       
         public Form1()
         {
             InitializeComponent();
@@ -27,6 +20,10 @@ namespace SynthInterface
         {
             waveOne = new Wave(Wave.Sine);
             sineWaveProvider = new SineWaveProvider32();
+            waveOne.Frequency = 1;
+            waveOne.Duration = 1;
+        
+            
 
         }
 
@@ -67,19 +64,22 @@ namespace SynthInterface
 
         }
 
-        private void chart1_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
             StartStopSineWave();
+          
+            
         }
 
         private void trackBar1_Scroll(object sender, EventArgs e)
         {
             sineWaveProvider.Frequency = trackBar1.Value;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+
+
         }
 
         private void StartStopSineWave()
@@ -101,6 +101,8 @@ namespace SynthInterface
                 waveOut = null;
             }
         }
+
+     
     }
 
 }

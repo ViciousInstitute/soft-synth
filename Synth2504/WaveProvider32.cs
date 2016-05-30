@@ -13,7 +13,7 @@ namespace Synth2504
         private WaveFormat waveFormat;
 
         public WaveProvider32()
-            : this(44100, 1)
+            : this(96000, 2)
         {
         }
 
